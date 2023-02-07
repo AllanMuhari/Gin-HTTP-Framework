@@ -26,7 +26,8 @@ func main() {
 
 	server := gin.New()
 
-	server.Use(gin.Recovery(), middleware.Logger())
+	server.Use(gin.Recovery(), middleware.Logger(),
+		middleware.BasicAuth())
 
 	server.GET("/videos", func(ctx *gin.Context) {
 		ctx.JSON(200, videoController.FindAll())
@@ -34,5 +35,5 @@ func main() {
 	server.POST("/videos", func(ctx *gin.Context) {
 		ctx.JSON(200, videoController.Save(ctx))
 	})
-
+	server.Run(":8080")
 }
