@@ -32,7 +32,7 @@ func main() {
 
 	server.Use(gin.Recovery(), middleware.Logger(),
 		middleware.BasicAuth())
-
+	//Basic Authorization Middleware applies to "/api" only
 	apiRoutes := server.Group("/api")
 	{
 		apiRoutes.GET("/videos", func(ctx *gin.Context) {
@@ -47,10 +47,17 @@ func main() {
 			}
 		})
 	}
+	// The "/view" endpoints are public (no Authorization required)
 	viewRoutes := server.Group("/view")
 	{
 		viewRoutes.GET("/videos", videoController.ShowAll)
 	}
 
-	server.Run(":8080")
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "5000"
+	}
+
+	server.Run(":" + port)
 }
