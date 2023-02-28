@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/golang-gin-po/controller"
-	"gitlab.com/golang-gin-po/middleware"
 	"gitlab.com/golang-gin-po/service"
 )
 
@@ -29,11 +28,20 @@ func main() {
 	server.Static("/css", "./templates/css")
 
 	server.LoadHTMLGlob("templates/*.html")
+	// Login Endpoint Authentication + Token creation
 
-	server.Use(gin.Recovery(), middleware.Logger(),
-		middleware.BasicAuth())
-	//Basic Authorization Middleware applies to "/api" only
-	apiRoutes := server.Group("/api")
+	server.POST("/login", func(ctx *gin.Context) {
+		token := loginController.Login(ctx)
+		if token != "" {
+			ctx.JSON(http.StatusOK, gin.H{
+				"token": token,
+			})
+		} else {
+			ctx.JSON(http.StatusUnauthorized, nil)
+		}
+	})
+	//Jwt Authorization Middleware applies to "/api" only
+	apiRoutes := server.Group("/api", middlewares.AuthorizeJwt())
 	{
 		apiRoutes.GET("/videos", func(ctx *gin.Context) {
 			ctx.JSON(200, videoController.FindAll())
